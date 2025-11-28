@@ -36,25 +36,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 1) Try to download artifact with previous build number
-      - name: Download previous build artifact
-        id: download_prev
-        uses: actions/download-artifact@v4
-        with:
-          name: sde-build-info
-          path: prev-build
-        continue-on-error: true
-
-      - name: Read previous build number from artifact (if exists)
+      # 1) Get previous build number from latest GitHub release
+      - name: Get previous build from latest release
         id: get_previous_sde
         run: |
-          if [ -d "prev-build" ] && [ -f "prev-build/sde_build.txt" ]; then
-            previous_build=$(cat prev-build/sde_build.txt | tr -d ' \n\r')
+          # Get the latest release tag
+          latest_tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
+
+          if [ -n "$latest_tag" ]; then
+            # Extract build number from tag (format: sde-{buildNumber})
+            previous_build="${latest_tag#sde-}"
           else
             previous_build=""
           fi
+
           echo "Previous SDE build number: '${previous_build}'"
           echo "previous_build=${previous_build}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
 
       # 2) Fetch latest SDE build from CCP
@@ -133,23 +132,7 @@ jobs:
           echo "Running Load.py for latest SDE..."
           python3 Load.py sqlite en --create-stripped
 
-      # 6) Save current build number as an artifact for next time
-      - name: Save current build number artifact
-        if: steps.compare.outputs.update_needed == 'true'
-        run: |
-          mkdir -p build-info
-          echo "${{ steps.get_latest_sde.outputs.latest_build }}" > build-info/sde_build.txt
-        shell: bash
-
-      - name: Upload build info artifact
-        if: steps.compare.outputs.update_needed == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: sde-build-info
-          path: build-info/sde_build.txt
-          retention-days: 90
-
-      # 7) Upload DBs as artifact for the release job
+      # 6) Upload DBs as artifact for the release job
       - name: Upload DB artifacts
         if: steps.compare.outputs.update_needed == 'true'
         uses: actions/upload-artifact@v4
