@@ -2,10 +2,10 @@
 from yaml import load
 try:
 	from yaml import CSafeLoader as SafeLoader
-	print "Using CSafeLoader"
+	print("Using CSafeLoader")
 except ImportError:
 	from yaml import SafeLoader
-	print "Using Python SafeLoader"
+	print("Using Python SafeLoader")
 
 import os
 from sqlalchemy import Table
@@ -24,47 +24,47 @@ def importyaml(connection,metadata,sourcePath):
     
     
 
-    print "importing Blueprints"
-    print "opening Yaml"
+    print("importing Blueprints")
+    print("opening Yaml")
     trans = connection.begin()
-    with open(os.path.join(sourcePath,'fsd','blueprints.yaml'),'r') as yamlstream:
+    with open(os.path.join(sourcePath,'blueprints.yaml'),'r') as yamlstream:
         blueprints=load(yamlstream,Loader=SafeLoader)
-        print "Yaml Processed into memory"
+        print("Yaml Processed into memory")
         for blueprint in blueprints:
-            connection.execute(industryBlueprints.insert(),typeID=blueprint,maxProductionLimit=blueprints[blueprint]["maxProductionLimit"])
+            connection.execute(industryBlueprints.insert().values(typeID=blueprint,maxProductionLimit=blueprints[blueprint]["maxProductionLimit"]))
             for activity in blueprints[blueprint]['activities']:
-                connection.execute(industryActivity.insert(),
+                connection.execute(industryActivity.insert().values(
                                     typeID=blueprint,
                                     activityID=activityIDs[activity],
-                                    time=blueprints[blueprint]['activities'][activity]['time'])
-                if blueprints[blueprint]['activities'][activity].has_key('materials'):
+                                    time=blueprints[blueprint]['activities'][activity]['time']))
+                if 'materials' in blueprints[blueprint]['activities'][activity]:
                     for material in blueprints[blueprint]['activities'][activity]['materials']:
-                        connection.execute(industryActivityMaterials.insert(),
+                        connection.execute(industryActivityMaterials.insert().values(
                                             typeID=blueprint,
                                             activityID=activityIDs[activity],
                                             materialTypeID=material['typeID'],
-                                            quantity=material['quantity'])
-                if blueprints[blueprint]['activities'][activity].has_key('products'):
+                                            quantity=material['quantity']))
+                if 'products' in blueprints[blueprint]['activities'][activity]:
                     for product in blueprints[blueprint]['activities'][activity]['products']:
-                        connection.execute(industryActivityProducts.insert(),
+                        connection.execute(industryActivityProducts.insert().values(
                                             typeID=blueprint,
                                             activityID=activityIDs[activity],
                                             productTypeID=product['typeID'],
-                                            quantity=product['quantity'])
-                        if product.has_key('probability'):
-                            connection.execute(industryActivityProbabilities.insert(),
+                                            quantity=product['quantity']))
+                        if 'probability' in product:
+                            connection.execute(industryActivityProbabilities.insert().values(
                                                 typeID=blueprint,
                                                 activityID=activityIDs[activity],
                                                 productTypeID=product['typeID'],
-                                                probability=product['probability'])
+                                                probability=product['probability']))
                 try:
-                    if blueprints[blueprint]['activities'][activity].has_key('skills'):
+                    if 'skills' in blueprints[blueprint]['activities'][activity]:
                         for skill in blueprints[blueprint]['activities'][activity]['skills']:
-                            connection.execute(industryActivitySkills.insert(),
+                            connection.execute(industryActivitySkills.insert().values(
                                                 typeID=blueprint,
                                                 activityID=activityIDs[activity],
                                                 skillID=skill['typeID'],
-                                                level=skill['level'])
+                                                level=skill['level']))
                 except:
-                    print '{} has a bad skill'.format(blueprint)
+                    print('{} has a bad skill'.format(blueprint))
     trans.commit()

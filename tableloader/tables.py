@@ -157,10 +157,8 @@ def metadataCreator(schema):
             Column('raceName', VARCHAR(length=100)),
             Column('description', VARCHAR(length=1000)),
             Column('iconID', INTEGER()),
-            Column('shortDescription', VARCHAR(length=500)),
+            Column('shortDescription', VARCHAR(length=1000)),
             schema=schema
-
-
     )
 
 
@@ -204,6 +202,7 @@ def metadataCreator(schema):
 
     crpNPCCorporations =  Table('crpNPCCorporations', metadata,
             Column('corporationID', INTEGER(), primary_key=True, autoincrement=False, nullable=False),
+            Column('corporationName', CHAR(length=100)),
             Column('size', CHAR(length=1)),
             Column('extent', CHAR(length=1)),
             Column('solarSystemID', INTEGER()),
@@ -232,8 +231,6 @@ def metadataCreator(schema):
             Column('description', VARCHAR(length=4000)),
             Column('iconID', INTEGER()),
             schema=schema
-
-
             )
 
 
@@ -602,8 +599,6 @@ def metadataCreator(schema):
             Column('bonusText',UnicodeText()),
             Column('unitID', INTEGER()),
             schema=schema
-
-
     )
 
 
@@ -870,6 +865,7 @@ def metadataCreator(schema):
             Column('factionID', INTEGER()),
             Column('radius', FLOAT(precision=53)),
             Column('sunTypeID', INTEGER()),
+            Column('starID', INTEGER()),
             Column('securityClass', VARCHAR(length=2)),
             schema=schema
     )
@@ -998,7 +994,7 @@ def metadataCreator(schema):
 
     skinMaterials =  Table('skinMaterials', metadata,
             Column('skinMaterialID', INTEGER(), primary_key=True, autoincrement=False, nullable=False),
-            Column('displayNameID', INTEGER()),
+            Column('displayName', INTEGER()),
             Column('materialSetID', INTEGER()),
             schema=schema
 

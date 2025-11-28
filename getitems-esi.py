@@ -11,9 +11,9 @@ import sys
 
 def getitems(typelist):
     typefuture=[]
-    print "getitems"
+    print("getitems")
     for typeid in typelist:
-        if isinstance(typeid,basestring) and typeid.startswith("https"):
+        if isinstance(typeid,str) and typeid.startswith("https"):
             typefuture.append(session.get(str(typeid)))
         else:
             typefuture.append(session.get(typelookupurl.format(typeid)))
@@ -25,7 +25,7 @@ def getitems(typelist):
             item=itemjson.get('type_id')
             if int(item) in sdetypelist:
                 try:
-                    connection.execute(invTypes.update().where(invTypes.c.typeID == literal_column(str(item))),
+                    connection.execute(invTypes.update().where(invTypes.c.typeID == literal_column(str(item))).values(
                                typeID=item,
                                typeName=itemjson['name'],
                                groupID=itemjson.get('group_id',None),
@@ -33,11 +33,11 @@ def getitems(typelist):
                                capacity=itemjson.get('capacity',None),
                                published=itemjson.get('published',False),
                                portionSize=itemjson.get('portion_size',None),
-                               volume=itemjson['volume'])
+                               volume=itemjson['volume']))
                 except:
                     pass
             else:
-                    connection.execute(invTypes.insert(),
+                    connection.execute(invTypes.insert().values(
                                 typeID=item,
                                 typeName=itemjson['name'],
                                 marketGroupID=itemjson.get('market_group_id',None),
@@ -47,10 +47,10 @@ def getitems(typelist):
                                 capacity=itemjson.get('capacity',None),
                                 portionSize=itemjson.get('portion_size',None),
                                 mass=itemjson.get('mass',None)
-                                )
+                                ))
         else:
             badlist.append(typedata.result().url)
-            print typedata.result().url
+            print(typedata.result().url)
         pbar.update(1)
     return badlist
 
@@ -59,7 +59,7 @@ def getitems(typelist):
 
 
 if len(sys.argv)<2:
-    print "Load.py destination"
+    print("Load.py destination")
     exit()
 
 
@@ -70,10 +70,10 @@ if len(sys.argv)==3:
 else:
     language='en'
 
-import ConfigParser, os
+import configparser, os
 fileLocation = os.path.dirname(os.path.realpath(__file__))
 inifile=fileLocation+'/sdeloader.cfg'
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(inifile)
 destination=config.get('Database',database)
 sourcePath=config.get('Files','sourcePath')
@@ -160,10 +160,10 @@ while page<=maxpage:
     groupjson=groups.json()
     maintypelist=maintypelist+groupjson
 
-print "Page variable is {}".format(page)
+print("Page variable is {}".format(page))
 
 firstbadlist=getitems(maintypelist)
-print "Getting badlist"
+print("Getting badlist")
 secondbadlist=getitems(firstbadlist)
 
 

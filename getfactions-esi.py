@@ -13,7 +13,7 @@ def getfactions():
     factiondata=requests.get('https://esi.evetech.net/latest/universe/factions/?datasource=tranquility&language=en-us')
     factionjson=factiondata.json()
     for faction in factionjson:
-        connection.execute(chrFactions.insert(),
+        connection.execute(chrFactions.insert().values(
 	factionID=faction.get('faction_id'),
 	factionName=faction.get('name'),
 	description=faction.get('description'),
@@ -23,12 +23,12 @@ def getfactions():
 	stationCount=faction.get('station_count'),
 	stationSystemCount=faction.get('station_system_count'),
 	militiaCorporationID=faction.get('militiaCorporationID'),
-    )
+    ))
 
 
 
 if len(sys.argv)<2:
-    print "Load.py destination"
+    print("Load.py destination")
     exit()
 
 
@@ -39,10 +39,10 @@ if len(sys.argv)==3:
 else:
     language='en'
 
-import ConfigParser, os
+import configparser, os
 fileLocation = os.path.dirname(os.path.realpath(__file__))
 inifile=fileLocation+'/sdeloader.cfg'
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(inifile)
 destination=config.get('Database',database)
 sourcePath=config.get('Files','sourcePath')

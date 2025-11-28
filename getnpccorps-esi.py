@@ -13,9 +13,9 @@ import sys
 
 def getcorps(corplist):
     corpfuture=[]
-    print "get corps"
+    print("get corps")
     for corpid in corplist:
-        if isinstance(corpid,basestring) and corpid.startswith("https"):
+        if isinstance(corpid,str) and corpid.startswith("https"):
             corpfputure.append(session.get(str(corpid)))
         else:
             corpfuture.append(session.get(corplookupurl.format(corpid)))
@@ -25,18 +25,18 @@ def getcorps(corplist):
         if corpdata.result().status_code==200:
             corpid=int(str(corpdata.result().url).split('/')[5])
             corpjson=corpdata.result().json()
-            connection.execute(invNames.insert(),
+            connection.execute(invNames.insert().values(
                             itemID=corpid,
                             itemName=corpjson.get('name',None)
-            )
+            ))
 
-            connection.execute(crpNPCCorporations.insert(),
+            connection.execute(crpNPCCorporations.insert().values(
                             corporationID=corpid,
                             description=corpjson.get('description',None),
-                            )
+                            ))
         else:
             badlist.append(typedata.result().url)
-            print typedata.result().url
+            print(typedata.result().url)
         pbar.update(1)
     return badlist
 
@@ -45,7 +45,7 @@ def getcorps(corplist):
 
 
 if len(sys.argv)<2:
-    print "Load.py destination"
+    print("Load.py destination")
     exit()
 
 
@@ -56,10 +56,10 @@ if len(sys.argv)==3:
 else:
     language='en'
 
-import ConfigParser, os
+import configparser, os
 fileLocation = os.path.dirname(os.path.realpath(__file__))
 inifile=fileLocation+'/sdeloader.cfg'
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(inifile)
 destination=config.get('Database',database)
 sourcePath=config.get('Files','sourcePath')
@@ -142,7 +142,7 @@ session = FuturesSession(max_workers=reqs_num_workers,session=base_session)
 corps=requests.get(corpurl).json()
 
 firstbadlist=getcorps(corps)
-print "Getting badlist"
+print("Getting badlist")
 secondbadlist=getcorps(firstbadlist)
 
 

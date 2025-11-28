@@ -4,20 +4,29 @@ Loads data back into approximately the same structure.
 
 Fetch the [YAML SDE from CCP's Developer site](https://developers.eveonline.com/resource/resources).
 
+# Requirements
+
+- Python 3.12 or later
+- libyaml (for improved YAML parsing performance)
+
 # Installation
 
 ## macOS
 
-Remember to install libyaml first, and adjust the include path for clang:
+Install libyaml first, and adjust the include path for clang:
 
     sudo port install libyaml
     export C_INCLUDE_PATH=/opt/local/include
 
 or
     brew install libyaml
-    export C_INCLUDE_PATH=/opt/local/include (not sure what Homebrew path would be)
+    export C_INCLUDE_PATH=/opt/local/include
 
-For PostgreSQL, you will also need to install `psycopg2`.
+Then install Python dependencies:
+
+    pip install -r requirements.txt
+
+For PostgreSQL, you will also need `psycopg2-binary` (included in requirements.txt).
 
 # Operation
 

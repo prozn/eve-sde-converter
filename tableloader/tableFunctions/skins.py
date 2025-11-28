@@ -2,58 +2,57 @@
 from yaml import load, dump
 try:
 	from yaml import CSafeLoader as SafeLoader
-	print "Using CSafeLoader"
+	print("Using CSafeLoader")
 except ImportError:
 	from yaml import SafeLoader
-	print "Using Python SafeLoader"
+	print("Using Python SafeLoader")
 
 import os
 import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
 from sqlalchemy import Table
 
-def importyaml(connection,metadata,sourcePath):
+def importyaml(connection,metadata,sourcePath,language='en'):
     skinLicense = Table('skinLicense',metadata)
     skinMaterials = Table('skinMaterials',metadata)
     skins_table = Table('skins',metadata)
     skinShip = Table('skinShip',metadata)            
                 
     trans = connection.begin()
-    print "Importing Skins"
-    print "opening Yaml1"
-    with open(os.path.join(sourcePath,'fsd','skins.yaml'),'r') as yamlstream:
+    print("Importing Skins")
+    print("opening Yaml1")
+    with open(os.path.join(sourcePath,'skins.yaml'),'r') as yamlstream:
         skins=load(yamlstream,Loader=SafeLoader)
-        print "Yaml Processed into memory"
+        print("Yaml Processed into memory")
         for skinid in skins:
-            connection.execute(skins_table.insert(),
+            connection.execute(skins_table.insert().values(
                             skinID=skinid,
                             internalName=skins[skinid].get('internalName',''),
-                            skinMaterialID=skins[skinid].get('skinMaterialID',''))
+                            skinMaterialID=skins[skinid].get('skinMaterialID','')))
             for ship in skins[skinid]['types']:
-                connection.execute(skinShip.insert(),
+                connection.execute(skinShip.insert().values(
                                 skinID=skinid,
-                                typeID=ship)
+                                typeID=ship))
 
 
-    print "opening Yaml2"
-    with open(os.path.join(sourcePath,'fsd','skinLicenses.yaml'),'r') as yamlstream:
+    print("opening Yaml2")
+    with open(os.path.join(sourcePath,'skinLicenses.yaml'),'r') as yamlstream:
         skinlicenses=load(yamlstream,Loader=SafeLoader)
-        print "Yaml Processed into memory"
+        print("Yaml Processed into memory")
         for licenseid in skinlicenses:
-            connection.execute(skinLicense.insert(),
+            connection.execute(skinLicense.insert().values(
                                 licenseTypeID=licenseid,
                                 duration=skinlicenses[licenseid]['duration'],
-                                skinID=skinlicenses[licenseid]['skinID'])
-    print "opening Yaml3"
-    with open(os.path.join(sourcePath,'fsd','skinMaterials.yaml'),'r') as yamlstream:
+                                skinID=skinlicenses[licenseid]['skinID']))
+    print("opening Yaml3")
+    with open(os.path.join(sourcePath,'skinMaterials.yaml'),'r') as yamlstream:
         skinmaterials=load(yamlstream,Loader=SafeLoader)
-        print "Yaml Processed into memory"
+        print("Yaml Processed into memory")
         for materialid in skinmaterials:
-            connection.execute(skinMaterials.insert(),
+            # Setting to None/NULL since we don't have an ID reference
+            connection.execute(skinMaterials.insert().values(
                                 skinMaterialID=materialid,
-                                displayNameID=skinmaterials[materialid]['displayNameID'],
-                                materialSetID=skinmaterials[materialid]['materialSetID']
-                                )
+                                displayName=skinmaterials[materialid].get('displayName', {}).get(language, ''),
+                                materialSetID=skinmaterials[materialid].get('materialSetID')
+                                ))
 
     trans.commit()

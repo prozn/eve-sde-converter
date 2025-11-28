@@ -11,9 +11,9 @@ import sys
 
 def getgroups(grouplist):
     groupfuture=[]
-    print "getgroups"
+    print("getgroups")
     for groupid in grouplist:
-        if isinstance(groupid,basestring) and groupid.startswith("https"):
+        if isinstance(groupid,str) and groupid.startswith("https"):
             groupfuture.append(session.get(str(groupid)))
         else:
             groupfuture.append(session.get(grouplookupurl.format(groupid)))
@@ -25,24 +25,24 @@ def getgroups(grouplist):
             item=itemjson.get('group_id')
             if int(item) in sdegrouplist:
                 try:
-                    connection.execute(invGroups.update().where(invGroups.c.groupID == literal_column(str(item))),
+                    connection.execute(invGroups.update().where(invGroups.c.groupID == literal_column(str(item))).values(
                                groupID=item,
                                groupName=itemjson['name'],
                                categoryID=itemjson.get('category_id',None),
                                published=itemjson.get('published',False),
-                               )
+                               ))
                 except:
                     pass
             else:
-                    connection.execute(invGroups.insert(),
+                    connection.execute(invGroups.insert().values(
                                groupID=item,
                                groupName=itemjson['name'],
                                categoryID=itemjson.get('category_id',None),
                                published=itemjson.get('published',False),
-                                )
+                                ))
         else:
             badlist.append(groupdata.result().url)
-            print groupdata.result().url
+            print(groupdata.result().url)
         pbar.update(1)
     return badlist
 
@@ -51,7 +51,7 @@ def getgroups(grouplist):
 
 
 if len(sys.argv)<2:
-    print "Load.py destination"
+    print("Load.py destination")
     exit()
 
 
@@ -62,10 +62,10 @@ if len(sys.argv)==3:
 else:
     language='en'
 
-import ConfigParser, os
+import configparser, os
 fileLocation = os.path.dirname(os.path.realpath(__file__))
 inifile=fileLocation+'/sdeloader.cfg'
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(inifile)
 destination=config.get('Database',database)
 sourcePath=config.get('Files','sourcePath')
@@ -146,10 +146,10 @@ while page<=maxpage:
     groupjson=groups.json()
     maingrouplist=maingrouplist+groupjson
 
-print "Page variable is {}".format(page)
+print("Page variable is {}".format(page))
 
 firstbadlist=getgroups(maingrouplist)
-print "Getting badlist"
+print("Getting badlist")
 secondbadlist=getgroups(firstbadlist)
 
 
