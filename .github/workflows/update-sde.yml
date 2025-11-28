@@ -116,7 +116,7 @@ jobs:
           curl -L -o sde.zip "$SDE_URL"
 
           echo "Extracting SDE..."
-          unzip -q sde.zip
+          unzip -q sde.zip -d sde
 
           # Copy invVolumes CSV files to SDE directory
           echo "Copying invVolumes CSV files..."
