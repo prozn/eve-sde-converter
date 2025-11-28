@@ -64,27 +64,27 @@ jobs:
           BASE="https://developers.eveonline.com/static-data"
           curl -s "$BASE/tranquility/latest.jsonl" > latest.jsonl
 
-          python - << 'PYCODE'
-import os, json
+          python3 << 'PYCODE'
+          import os, json
 
-latest_build = None
-with open("latest.jsonl", "r", encoding="utf-8") as f:
-    for line in f:
-        line = line.strip()
-        if not line:
-            continue
-        rec = json.loads(line)
-        if rec.get("_key") == "sde":
-            latest_build = str(rec["buildNumber"])
-            break
+          latest_build = None
+          with open("latest.jsonl", "r", encoding="utf-8") as f:
+              for line in f:
+                  line = line.strip()
+                  if not line:
+                      continue
+                  rec = json.loads(line)
+                  if rec.get("_key") == "sde":
+                      latest_build = str(rec["buildNumber"])
+                      break
 
-if not latest_build:
-    raise SystemExit("Could not find SDE buildNumber in latest.jsonl")
+          if not latest_build:
+              raise SystemExit("Could not find SDE buildNumber in latest.jsonl")
 
-print(f"Latest SDE build number: {latest_build}")
-with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
-    out.write(f"latest_build={latest_build}\n")
-PYCODE
+          print(f"Latest SDE build number: {latest_build}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"latest_build={latest_build}\n")
+          PYCODE
         shell: bash
 
       # 3) Compare previous vs latest
